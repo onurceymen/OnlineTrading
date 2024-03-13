@@ -1,37 +1,33 @@
-﻿using MainMVC.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace MainMVC.Controllers
 {
-    public class HomeController : Controller
+    public class AuthController : Controller
     {
         public IActionResult Index()
         {
             return View();
         }
 
-        [Route("/about-us")]
-        public IActionResult AboutUs()
+        public IActionResult Register()
         {
             // Register action implementation
             return View();
         }
 
-        public IActionResult Contact()
+        public IActionResult Login()
         {
             // Login action implementation
             return View();
         }
 
-        public IActionResult Listing()
+        public IActionResult ForgotPassword()
         {
             // ForgotPassword action implementation
             return View();
         }
 
-        [Route("{categoryName}-{title}-{id}/details")]
-        public IActionResult ProductDetail()
+        public IActionResult Logout()
         {
             // Logout action implementation
             return View();
