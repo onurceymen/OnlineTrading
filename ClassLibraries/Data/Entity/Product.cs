@@ -40,5 +40,8 @@ namespace Data.Entity
         [Required]
         public bool Enabled { get; set; } = true;
 
+
+        public ICollection<ProductComment> ProductComments { get; set; }
+        public ICollection<ProductImage> ProductImages { get; set; }
     }
 }

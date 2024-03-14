@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Data.Entity.Product>
+
+@{
+    ViewData["Title"] = "Listing";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Listing</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock Amount</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Name</td>
+                <td>@product.Price</td>
+                <td>@product.StockAmount</td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = product.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = product.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = product.Id })
+                </td>
+            </tr>
+        }
+    </tbody>

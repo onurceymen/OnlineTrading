@@ -1,0 +1,27 @@
+﻿@model MainMVC.ViewModels.HomeViewModel.ContactViewModel;
+
+@{
+    ViewData["Title"] = "Contact";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Contact Us</h2>
+
+<form asp-action="Contact" method="post">
+    <div class="form-group">
+        <label asp-for="UserName">Name</label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="UserEmail">Email</label>
+        <input asp-for="UserEmail" class="form-control" />
+        <span asp-validation-for="UserEmail" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Message">Message</label>
+        <textarea asp-for="Message" class="form-control"></textarea>
+        <span asp-validation-for="Message" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Send Message</button>
+</form>

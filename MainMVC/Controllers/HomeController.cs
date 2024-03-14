@@ -1,23 +1,32 @@
 ﻿using Data.Context;
-using MainMVC.Models;
+using MainMVC.Services.HomeServices;
+using MainMVC.Services.ProductServices;
+using MainMVC.ViewModels.HomeViewModel;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
+
 
 namespace MainMVC.Controllers
 {
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly ListingService _listingService;
+        private readonly ContactService _contactService;
+        private readonly ProductDetailService _productDetailService;
+        private readonly CommentService _commentService;
 
-        public HomeController(AppDbContext context)
+        public HomeController(AppDbContext context, ListingService listingService, ContactService contactService, ProductDetailService productDetailService, CommentService commentService)
         {
             _context = context;
+            _listingService = listingService;
+            _contactService = contactService;
+            _productDetailService = productDetailService;
+            _commentService = commentService;
         }
+
         public IActionResult Index()
         {
-            var users = SeedData.GetUser(10);
-            return View(users);
+            return View();
         }
 
         [Route("/about-us")]
@@ -27,23 +36,50 @@ namespace MainMVC.Controllers
             return View();
         }
 
+        [HttpGet]
         public IActionResult Contact()
         {
-            // Login action implementation
-            return View();
+            return RedirectToAction("Index");
         }
+
+
+        [HttpPost]
+        public IActionResult Contact(ContactViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _contactService.SaveContactMessage(model);
+                return RedirectToAction("Index", "Home");
+            }
+            return View(model);
+        }
+
 
         public IActionResult Listing()
         {
-            // ForgotPassword action implementation
+            _listingService.GetAllProducts();
+            return View(_listingService);
+        }
+
+        [HttpGet]
+        public IActionResult ProductDetail()
+        {
             return View();
         }
 
+        [HttpPost]
         [Route("{categoryName}-{title}-{id}/details")]
-        public IActionResult ProductDetail()
+        public IActionResult ProductDetail(int id)
         {
-            // Logout action implementation
-            return View();
+            var productDetailViewModel = _productDetailService.GetProductDetail(id);
+            if (productDetailViewModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(productDetailViewModel);
         }
+
+
     }
 }

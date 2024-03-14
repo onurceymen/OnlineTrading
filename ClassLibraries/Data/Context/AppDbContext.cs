@@ -1,4 +1,5 @@
 ﻿using Data.Entity;
+using Data.Entity.EntityMVC;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Context
@@ -16,6 +17,8 @@ namespace Data.Context
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<ProductComment> ProductComments { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        // MainMvc Entity
+        public DbSet<ContactMessage> contactMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

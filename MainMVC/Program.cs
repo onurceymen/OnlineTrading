@@ -1,15 +1,23 @@
 using Data.Context;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using MainMVC.Services.HomeServices;
+using MainMVC.Services.ProductServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+//HomeServices
+builder.Services.AddScoped<ContactService>();
+builder.Services.AddScoped<ListingService>();
+builder.Services.AddScoped<ProductService>();
 
+//ProductService
+builder.Services.AddScoped<CreateService>();
+builder.Services.AddScoped<DeleteService>();
+builder.Services.AddScoped<EditService>();
+builder.Services.AddScoped<ProductDetailService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer("Server=localhost;Database=OnlineTrading;User Id=sa;Password=reallyStrongPwd123;Encrypt=true;TrustServerCertificate=True;"));
@@ -50,10 +58,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        // Örnek olarak 10 kullanýcý ekle
-        var users = SeedData.GetUser(10);
-        context.Users.AddRange(users);
-        context.SaveChanges();
+        SeedData.Initialize(context);
+
     }
     catch (Exception ex)
     {

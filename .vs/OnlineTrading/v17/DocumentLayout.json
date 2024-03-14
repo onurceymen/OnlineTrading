@@ -1,12 +1,54 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\onurc\\source\\repos\\OnlineTrading\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{14284AB5-78AE-4910-807E-5C4727D2C501}|MainMVC\\MainMVC.csproj|c:\\users\\onurc\\source\\repos\\onlinetrading\\mainmvc\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{14284AB5-78AE-4910-807E-5C4727D2C501}|MainMVC\\MainMVC.csproj|solutionrelative:mainmvc\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{14284AB5-78AE-4910-807E-5C4727D2C501}|MainMVC\\MainMVC.csproj|c:\\users\\onurc\\source\\repos\\onlinetrading\\mainmvc\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{14284AB5-78AE-4910-807E-5C4727D2C501}|MainMVC\\MainMVC.csproj|solutionrelative:mainmvc\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\onurc\\source\\repos\\OnlineTrading\\MainMVC\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "MainMVC\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\onurc\\source\\repos\\OnlineTrading\\MainMVC\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "MainMVC\\Controllers\\HomeController.cs",
+              "ViewState": "AQIAADoAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-03-14T19:25:31.639Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "C:\\Users\\onurc\\source\\repos\\OnlineTrading\\MainMVC\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "MainMVC\\Controllers\\ProductController.cs",
+              "ToolTip": "C:\\Users\\onurc\\source\\repos\\OnlineTrading\\MainMVC\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "MainMVC\\Controllers\\ProductController.cs",
+              "ViewState": "AQIAABcAAAAAAAAAAAAAAJkAAAASAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-03-14T15:33:19.662Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
