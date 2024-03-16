@@ -1,21 +1,41 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MainMVC.Services.OrderServices;
+using MainMVC.ViewModels.OrderViewModel;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MainMVC.Controllers
 {
     public class OrderController : Controller
     {
-        public IActionResult Index()
+        private readonly OrderService _orderService;
+
+        public OrderController(OrderService orderService)
         {
-            return View();
+            _orderService = orderService;
         }
+
         public IActionResult Create()
         {
+            // Implement view logic as needed
             return View();
         }
-        [Route("/order/{id}/details")]
-        public IActionResult Details()
+
+        [HttpPost]
+        public IActionResult Create(OrderViewModel model)
         {
-            return View();
+            // Implement validation and error handling as needed
+            _orderService.CreateOrder(model.UserId, model.Address);
+            return RedirectToAction("Index", "Home"); // Redirect to home page or order details page
+        }
+
+        public IActionResult Details(int id)
+        {
+            var orderViewModel = _orderService.GetOrderDetails(id);
+            if (orderViewModel == null)
+            {
+                return NotFound(); // or handle the case where order is not found
+            }
+
+            return View(orderViewModel);
         }
     }
 }

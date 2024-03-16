@@ -15,15 +15,19 @@ namespace Data.Entity
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        public int UserId { get; set; } // User Id
+
+        public int ProductId { get; set; } // Product Id
+
+        [Range(1, byte.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
+        [Required]
+        public byte Quantity { get; set; }
+
         [ForeignKey("UserId")]
         public User Users { get; set; }
 
         [ForeignKey("ProductId")]
         public Product Products { get; set; }
-
-        [Range(1, byte.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
-        [Required]
-        public byte Quantity { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; }

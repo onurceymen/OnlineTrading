@@ -1,22 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MainMVC.Services.CartServices;
+using MainMVC.ViewModels.CartViewModel;
+using Microsoft.AspNetCore.Mvc;
+using MainMVC.ViewModels.CartViewModel;
+
 
 namespace MainMVC.Controllers
 {
     public class CartController : Controller
     {
+        private readonly CartService _cartService;
+
+        public CartController(CartService cartService)
+        {
+            _cartService = cartService;
+        }
+
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult AddProduct()
+
+        [HttpPost]
+        public IActionResult AddProductToCart(CartViewModel model)
         {
-            return View();
+            // Implement validation and error handling as needed
+            _cartService.AddProductToCart(model.UserId, model.ProductId, model.Quantity);
+            return RedirectToAction("Index", "Home"); // Redirect to home page or cart page
         }
 
-        public IActionResult Edit()
+        [HttpPost]
+        public IActionResult EditCartItem(CartViewModel model)
         {
-            return View();
+            // Implement validation and error handling as needed
+            _cartService.EditCartItem(model.CartItemId, model.Quantity);
+            return RedirectToAction("Index", "Cart"); // Redirect to cart page
         }
     }
 }

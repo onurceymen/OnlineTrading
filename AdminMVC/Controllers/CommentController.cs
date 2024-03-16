@@ -1,23 +1,29 @@
 ﻿
+using AdminMVC.Services.CommentServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AdminMVC.Controllers
 {
     public class CommentController : Controller
     {
-        public IActionResult Index()
+        private readonly CommentService _commentService;
+
+        public CommentController(CommentService commentService)
         {
-            return View();
+            _commentService = commentService;
         }
 
         public IActionResult List()
         {
-            return View();
+            var comments = _commentService.GetComments();
+            return View(comments);
         }
 
-        public IActionResult Approve()
+        [HttpPost]
+        public IActionResult Approve(int commentId)
         {
-            return View();
+            _commentService.ApproveComment(commentId);
+            return RedirectToAction("List");
         }
     }
 }

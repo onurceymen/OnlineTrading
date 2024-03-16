@@ -1,9 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AdminMVC.Services.UserServices;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AdminMVC.Controllers
 {
     public class UserController : Controller
     {
+        private readonly UserService _userService;
+
+        public UserController(UserService userService)
+        {
+            _userService = userService;
+        }
         public IActionResult Index()
         {
             return View();
@@ -11,12 +18,15 @@ namespace AdminMVC.Controllers
 
         public IActionResult List()
         {
-            return View();
+            var users = _userService.GetUsers();
+            return View(users);
         }
 
-        public IActionResult Approve()
+        [HttpPost]
+        public IActionResult Approve(int userId)
         {
-            return View();
+            _userService.ApproveSeller(userId);
+            return RedirectToAction("List");
         }
     }
 }

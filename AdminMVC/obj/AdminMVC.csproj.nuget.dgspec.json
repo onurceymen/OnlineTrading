@@ -161,6 +161,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[7.0.16, )"
+            },
+            "Microsoft.Extensions.Identity.Stores": {
+              "target": "Package",
+              "version": "[7.0.16, )"
             }
           },
           "imports": [

@@ -2,6 +2,12 @@ using Data.Context;
 using Microsoft.EntityFrameworkCore;
 using MainMVC.Services.HomeServices;
 using MainMVC.Services.ProductServices;
+using Data.Entity;
+using Microsoft.AspNetCore.Identity;
+using MainMVC.Services.AuthServices;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +25,35 @@ builder.Services.AddScoped<DeleteService>();
 builder.Services.AddScoped<EditService>();
 builder.Services.AddScoped<ProductDetailService>();
 
+
+//AuthServices
+builder.Services.AddScoped<AuthService>();
+
+
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer("Server=localhost;Database=OnlineTrading;User Id=sa;Password=reallyStrongPwd123;Encrypt=true;TrustServerCertificate=True;"));
+
+// ConfigureServices metoduna aþaðýdaki kodlarý ekleyin
+// AddIdentity ve AddEntityFrameworkStores metodlarýný düzeltin
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    // Identity ayarlarý
+    options.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<AppDbContext>() // int tipini kullanýcý kimliði olarak belirtin
+    .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Cookie ayarlarý
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Auth/AccessDenied";
+    options.SlidingExpiration = true;
+});
+
 
 
 var app = builder.Build();
@@ -42,7 +75,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Auth}/{action=Login}/{id?}");
 
 using (var serviceScope = app.Services.CreateScope())
 {
