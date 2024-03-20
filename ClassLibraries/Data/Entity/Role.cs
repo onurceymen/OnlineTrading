@@ -20,6 +20,5 @@ namespace Data.Entity
 
         [Required]
         public DateTime CreatedAt { get; set; }
-
     }
 }

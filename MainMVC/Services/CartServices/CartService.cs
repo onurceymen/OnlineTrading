@@ -1,11 +1,14 @@
 ﻿using Data.Context;
 using Data.Entity;
+using MainMVC.Contracts;
+using MainMVC.ViewModels.CartViewModel;
 using MainMVC.ViewModels.ProductViewModel;
 using Microsoft.AspNetCore.Http;
+using Microsoft.CodeAnalysis;
 
 namespace MainMVC.Services.CartServices
 {
-    public class CartService
+    public class CartService : ICartService
     {
         private readonly AppDbContext _dbContext;
 
@@ -14,38 +17,29 @@ namespace MainMVC.Services.CartServices
             _dbContext = dbContext;
         }
 
-        public void AddProductToCart(int userId, int productId, byte quantity)
+        public async Task<bool> AddProductToCartAsync(CartViewModel model)
         {
-            var cartItem = _dbContext.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+            var cartItem = _dbContext.CartItems.FirstOrDefault(c => c.UserId == model.UserId && c.ProductId == model.ProductId);
 
             if (cartItem == null)
             {
                 cartItem = new CartItem
                 {
-                    UserId = userId,
-                    ProductId = productId,
-                    Quantity = quantity,
+                    UserId = model.UserId,
+                    ProductId = model.ProductId,
+                    Quantity = model.Quantity,
                     CreatedAt = DateTime.Now
                 };
                 _dbContext.CartItems.Add(cartItem);
             }
-            else
-            {
-                cartItem.Quantity += quantity;
-            }
-
             _dbContext.SaveChanges();
+
+            return true;
         }
 
-        public void EditCartItem(int cartItemId, byte quantity)
+        public Task<bool> EditCartAsync(CartViewModel model)
         {
-            var cartItem = _dbContext.CartItems.FirstOrDefault(c => c.Id == cartItemId);
-
-            if (cartItem != null)
-            {
-                cartItem.Quantity = quantity;
-                _dbContext.SaveChanges();
-            }
+            throw new NotImplementedException();
         }
     }
 }

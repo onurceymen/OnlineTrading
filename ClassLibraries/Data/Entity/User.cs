@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel;
 
 namespace Data.Entity
 {
@@ -10,28 +11,28 @@ namespace Data.Entity
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required]
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required]
         [StringLength(50, MinimumLength = 2)]
         public string FirstName { get; set; }
 
-        [Required]
         [StringLength(50, MinimumLength = 2)]
         public string LastName { get; set; }
 
-        [Required]
+        [PasswordPropertyText]
+        [ProtectedPersonalData]
         public string Password { get; set; }
-
+        
+        public int RoleId { get; set; }
         [ForeignKey("RoleId")]
-        public Role Roles { get; set; }
-
-        [Required]
+        public Role Role { get; set; }
+        
         public bool Enabled { get; set; } = true;
 
-        [Required]
         public DateTime CreatedAt { get; set; }
+
+        public ICollection<Order> Order { get; set; }
+
     }
 }

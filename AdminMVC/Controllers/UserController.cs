@@ -18,15 +18,13 @@ namespace AdminMVC.Controllers
 
         public IActionResult List()
         {
-            var users = _userService.GetUsers();
-            return View(users);
+            return View();
         }
 
         [HttpPost]
         public IActionResult Approve(int userId)
         {
-            _userService.ApproveSeller(userId);
-            return RedirectToAction("List");
+            return View();
         }
     }
 }

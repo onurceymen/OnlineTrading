@@ -3,11 +3,14 @@ using System;
 using System.Linq;
 using Data.Context;
 using Data.Entity;
+using MainMVC.Contracts;
+using MainMVC.ViewModels.OrderViewModel;
+using MainMVC.ViewModels.ProductViewModel;
 using MainMVC.ViewModels.ProfileViewModels;
 
 namespace Data.Services
 {
-    public class ProfileService
+    public class ProfileService : IProfileService
     {
         private readonly AppDbContext _dbContext;
 
@@ -16,47 +19,37 @@ namespace Data.Services
             _dbContext = dbContext;
         }
 
-        public ProfileViewModel GetUserProfile(int userId)
+        public async Task<ProfileViewModel> GetUserProfileAsync(int userId)
         {
             var user = _dbContext.Users
-                .Where(u => u.Id == userId)
-                .Select(u => new ProfileViewModel
-                {
-                    Email = u.Email,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    Role = u.Roles.Name,
-                    Enabled = u.Enabled
-                })
-                .FirstOrDefault();
-
+                            .Where(u => u.Id == userId)
+                            .Select(u => new ProfileViewModel
+                            {
+                                Email = u.Email,
+                                FirstName = u.FirstName,
+                                LastName = u.LastName,
+                                Role = u.Role.Name,
+                                Enabled = u.Enabled
+                            })
+                            .FirstOrDefault();
             return user;
         }
 
-        public void UpdateUserProfile(int userId, ProfileViewModel profileViewModel)
+        public Task<bool> UpdateUserProfileAsync(ProfileViewModel model)
         {
-            var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
-            if (user != null)
-            {
-                user.FirstName = profileViewModel.FirstName;
-                user.LastName = profileViewModel.LastName;
-
-                _dbContext.SaveChanges();
-            }
+            throw new NotImplementedException();
         }
 
-        public List<Order> GetUserOrders(int userId)
+        public Task<IEnumerable<OrderViewModel>> GetUserOrdersAsync(int userId)
         {
-            return _dbContext.Orders
-                .Where(o => o.Users.Id == userId)
-                .ToList();
+            throw new NotImplementedException();
         }
 
-        public List<Product> GetSellerProducts(int sellerId)
+        public Task<IEnumerable<ProductViewModel>> GetUserProductsAsync(int userId)
         {
-            return _dbContext.Products
-                .Where(p => p.Seller.Id == sellerId)
-                .ToList();
+            throw new NotImplementedException();
         }
+
+       
     }
 }

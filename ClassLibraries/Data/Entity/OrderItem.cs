@@ -10,16 +10,17 @@ namespace Data.Entity
 {
     public class OrderItem
     {
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        public int OrderId { get; set; }
         [ForeignKey("OrderId")]
-        public Order Orders { get; set; }
+        public Order Order { get; set; }
 
+        public int ProductId { get; set; }
         [ForeignKey("ProductId")]
-        public Product Products { get; set; }
+        public Product Product { get; set; }
 
         [Range(1, byte.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
         [Required]

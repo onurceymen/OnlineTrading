@@ -1,9 +1,11 @@
-﻿using AdminMVC.ViewModels.CommentViewModels;
+﻿using AdminMVC.Contracts;
+using AdminMVC.ViewModels.CommentViewModels;
 using Data.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace AdminMVC.Services.CommentServices
 {
-    public class CommentService
+    public class CommentService :ICommentService
     {
         private readonly AppDbContext _dbContext;
 
@@ -12,32 +14,57 @@ namespace AdminMVC.Services.CommentServices
             _dbContext = dbContext;
         }
 
-        public List<CommentViewModel> GetComments()
+        public async Task<IEnumerable<CommentViewModel>> GetAllCommentsAsync()
         {
-            return _dbContext.ProductComments
-                .Select(pc => new CommentViewModel
+            return await _dbContext.ProductComments
+                .Select(pc => new CommentViewModel()
                 {
                     CommentId = pc.Id,
-                    ProductId = pc.ProductId,
+                    ProductId= pc.Product.Id,
                     ProductName = pc.Product.Name,
-                    UserId = pc.UserId,
+                    UserId = pc.User.Id,
                     UserName = pc.User.FirstName + " " + pc.User.LastName,
                     Text = pc.Text,
                     StarCount = pc.StarCount,
                     IsConfirmed = pc.IsConfirmed,
                     CreatedAt = pc.CreatedAt
                 })
-                .ToList();
+                .ToListAsync();
         }
 
-        public void ApproveComment(int commentId)
+        public async Task<CommentViewModel> GetCommentByIdAsync(int id)
         {
-            var comment = _dbContext.ProductComments.FirstOrDefault(pc => pc.Id == commentId);
-            if (comment != null)
+            if (id == 0)
             {
-                comment.IsConfirmed = true;
-                _dbContext.SaveChanges();
+                return null;
             }
+
+            var comment = await _dbContext.ProductComments
+                .Where(pc => pc.Id == id)
+                .Select(pc => new CommentViewModel()
+                {
+                    CommentId = pc.Id,
+                    ProductId = pc.Product.Id,
+                })
+                .FirstOrDefaultAsync();
+
+            return comment;
+
+        }
+
+        public Task<CommentViewModel> CreateCommentAsync(CommentViewModel comment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateCommentAsync(CommentViewModel comment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteCommentAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -5,8 +5,9 @@ using MainMVC.Services.ProductServices;
 using Data.Entity;
 using Microsoft.AspNetCore.Identity;
 using MainMVC.Services.AuthServices;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using MainMVC.Services.CartServices;
+using MainMVC.Services.OrderServices;
+using Data.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,21 +15,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-//HomeServices
-builder.Services.AddScoped<ContactService>();
-builder.Services.AddScoped<ListingService>();
-builder.Services.AddScoped<ProductService>();
-
-//ProductService
-builder.Services.AddScoped<CreateService>();
-builder.Services.AddScoped<DeleteService>();
-builder.Services.AddScoped<EditService>();
-builder.Services.AddScoped<ProductDetailService>();
-
-
+//Services 
 //AuthServices
 builder.Services.AddScoped<AuthService>();
 
+//CartServices
+builder.Services.AddScoped<CartService>();
+
+//HomeServices
+builder.Services.AddScoped<HomeService>();
+builder.Services.AddScoped<ContactService>();
+
+//OrderServices
+builder.Services.AddScoped<OrderService>();
+
+//ProductService
+builder.Services.AddScoped<ProductService>();
+
+//ProfileServices
+builder.Services.AddScoped<ProfileService>();
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -41,7 +46,8 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     // Identity ayarlarý
     options.User.RequireUniqueEmail = true;
 })
-    .AddEntityFrameworkStores<AppDbContext>() // int tipini kullanýcý kimliði olarak belirtin
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultUI()
     .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -75,29 +81,31 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Auth}/{action=Login}/{id?}");
+    pattern: "{controller=Auth}/{action=Register}/{id?}");
 
 using (var serviceScope = app.Services.CreateScope())
 {
     var serviceProvider = serviceScope.ServiceProvider;
     var context = serviceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated(); // veya EnsureCreatedAsync() kullanýlabilir
+    context.Database.EnsureCreated(); 
 }
 
 // Seed verilerini ekle
-using (var scope = app.Services.CreateScope())
+using (var serviceScope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        SeedData.Initialize(context);
+    var serviceProvider = serviceScope.ServiceProvider;
+    var context = serviceProvider.GetRequiredService<AppDbContext>();
 
-    }
-    catch (Exception ex)
+    // Eðer veritabanýnda kullanýcý varsa seed iþlemini yapma
+    if (!context.Users.Any())
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        var seedData = new SeedData(context);
+        seedData.Initialize();
+        Console.WriteLine("Veritabaný baþarýyla seedlendi.");
+    }
+    else
+    {
+        Console.WriteLine("Veritabanýnda zaten kullanýcýlar mevcut, seed iþlemi yapýlmadý.");
     }
 }
 app.Run();

@@ -28,4 +28,8 @@
     <ProjectReference Include="..\ClassLibraries\Data\Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Product\" />
+  </ItemGroup>
+
 </Project>

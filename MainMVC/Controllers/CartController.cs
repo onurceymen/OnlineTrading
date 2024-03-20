@@ -20,21 +20,29 @@ namespace MainMVC.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult AddProductToCartAsync()
+        {
+            return View();
+        }
 
         [HttpPost]
-        public IActionResult AddProductToCart(CartViewModel model)
+        public IActionResult AddProductToCartAsync(CartViewModel model)
         {
-            // Implement validation and error handling as needed
-            _cartService.AddProductToCart(model.UserId, model.ProductId, model.Quantity);
-            return RedirectToAction("Index", "Home"); // Redirect to home page or cart page
+            _cartService.AddProductToCartAsync(model);
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult EditCartItem()
+        {
+            return RedirectToAction("Index", "Cart"); 
         }
 
         [HttpPost]
         public IActionResult EditCartItem(CartViewModel model)
         {
-            // Implement validation and error handling as needed
-            _cartService.EditCartItem(model.CartItemId, model.Quantity);
-            return RedirectToAction("Index", "Cart"); // Redirect to cart page
+            return RedirectToAction("Index", "Cart"); 
         }
     }
 }

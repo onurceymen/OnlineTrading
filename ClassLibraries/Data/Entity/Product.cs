@@ -14,11 +14,13 @@ namespace Data.Entity
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        public int SellerId { get; set; }
         [ForeignKey("SellerId")]
         public User Seller { get; set; }
 
+        public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
-        public Category Categorys { get; set; }
+        public Category Category { get; set; }
 
         [Required]
         [StringLength(100, MinimumLength = 2)]
@@ -39,7 +41,6 @@ namespace Data.Entity
 
         [Required]
         public bool Enabled { get; set; } = true;
-
 
         public ICollection<ProductComment> ProductComments { get; set; }
         public ICollection<ProductImage> ProductImages { get; set; }

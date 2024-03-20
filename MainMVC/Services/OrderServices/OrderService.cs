@@ -1,9 +1,13 @@
-﻿using Data.Context;
+﻿using Bogus.DataSets;
+using Data.Context;
+using Data.Entity;
+using MainMVC.Contracts;
 using MainMVC.ViewModels.OrderViewModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace MainMVC.Services.OrderServices
 {
-    public class OrderService
+    public class OrderService : IOrderService
     {
         private readonly AppDbContext _dbContext;
 
@@ -12,52 +16,60 @@ namespace MainMVC.Services.OrderServices
             _dbContext = dbContext;
         }
 
-        public void CreateOrder(int userId, string address)
+        private string GenerateOrderCode()
         {
-            var orderCode = Guid.NewGuid().ToString().Substring(0, 8); // Generate a unique order code
-            var order = new Order
-            {
-                UserId = userId,
-                OrderCode = orderCode,
-                Address = address,
-                CreatedAt = DateTime.Now
-            };
-
-            _dbContext.Orders.Add(order);
-            _dbContext.SaveChanges();
+            // Rastgele sipariş kodu oluşturmak için kullanılacak kod
+            return "ODR" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
         }
 
-        public OrderViewModel GetOrderDetails(int orderId)
+        public async Task<bool> CreateOrderAsync(OrderViewModel model)
         {
-            var order = _dbContext.Orders.FirstOrDefault(o => o.Id == orderId);
+            var newOrder = new Order
+            {
+                UserId = model.UserId,
+                Address = model.Address,
+                CreatedAt = DateTime.Now,
+                OrderCode = GenerateOrderCode() // Bu metot rastgele sipariş kodu oluşturabilir
+            };
+
+            _dbContext.Orders.Add(newOrder);
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+
+        public async Task<OrderViewModel> GetOrderDetailsAsync(int orderId)
+        {
+            var order =  _dbContext.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefault(o => o.Id == orderId);
+
             if (order == null)
             {
                 return null;
             }
 
-            var orderItems = _dbContext.OrderItems
-                .Where(oi => oi.OrderId == orderId)
-                .Select(oi => new OrderItemViewModel
-                {
-                    ProductId = oi.ProductId,
-                    ProductName = oi.Product.Name,
-                    UnitPrice = oi.UnitPrice,
-                    Quantity = oi.Quantity,
-                    TotalPrice = oi.UnitPrice * oi.Quantity
-                })
-                .ToList();
-
             var orderViewModel = new OrderViewModel
             {
                 OrderId = order.Id,
                 UserId = order.UserId,
-                UserName = order.User.FirstName + " " + order.User.LastName,
+                UserName = order.User?.UserName,
                 OrderCode = order.OrderCode,
                 Address = order.Address,
                 CreatedAt = order.CreatedAt,
-                OrderItems = orderItems
+                ProductId = order.OrderItems.FirstOrDefault()?.Product?.Id ?? 0,
+                ProductName = order.OrderItems.FirstOrDefault()?.Product?.Name,
+                UnitPrice = order.OrderItems.FirstOrDefault()?.UnitPrice ?? 0,
+                Quantity = order.OrderItems.FirstOrDefault()?.Quantity ?? 0,
+                TotalPrice = order.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity)
             };
 
             return orderViewModel;
+
+
         }
     }
+}

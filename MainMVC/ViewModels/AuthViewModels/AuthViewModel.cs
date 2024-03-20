@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MainMVC.ViewModels.AuthViewModels
 {
-    public class AuthViewModel : IdentityUser
+    public class AuthViewModel 
     {
    
         [Required]

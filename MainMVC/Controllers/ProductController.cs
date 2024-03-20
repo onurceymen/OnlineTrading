@@ -1,5 +1,4 @@
 ﻿using Data.Entity;
-using MainMVC.Services.HomeServices;
 using MainMVC.Services.ProductServices;
 using MainMVC.ViewModels.ProductViewModel;
 using Microsoft.AspNetCore.Mvc;
@@ -9,98 +8,91 @@ namespace MainMVC.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly CreateService _createService;
-        private readonly ProductDetailService _productDetailService;
         private readonly ProductService _productService;
-        private readonly DeleteService _deleteService;
-        private readonly ListingService _listingService;
-        private readonly CommentService _commentService;
 
-
-
-        public ProductController(CreateService createService, ProductDetailService productDetailService, ProductService productService, DeleteService deleteService, ListingService listingService, CommentService commentService)
+        public ProductController(ProductService productService)
         {
-            _createService = createService;
-            _productDetailService = productDetailService;
             _productService = productService;
-            _deleteService = deleteService;
-            _listingService = listingService;
-            _commentService = commentService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            _listingService.GetAllProducts();
-            return View();
+            var products = await _productService.GetAllProductsAsync();
+            return View(products);
         }
 
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new CreateViewModel());
+            return View(new ProductViewModel());
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> Create(CreateViewModel model, User seller, Category category)
+        public async Task<IActionResult> Create(ProductViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            var product = await _createService.CreateProductAsync(model, seller, category);
+            var product = await _productService.CreateProductAsync(model);
 
-            // Redirect to the details page of the created product
-            return RedirectToAction("Details", new { id = product.Id });
+            if (product == null)
+            {
+                ModelState.AddModelError("", "Ürün oluşturulamadı.");
+                return View(model);
+            }
+
+            return RedirectToAction("Details", new { id = model.Id });
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int productId)
         {
-            var product = _productService.GetProductById(id);
+            var product = await _productService.GetProductDetailAsync(productId);
             if (product == null)
             {
-                return NotFound(); // Ürün bulunamadıysa 404 hatası döndür
+                return NotFound();
             }
 
-            var model = new EditViewModel
+            var model = new ProductViewModel
             {
                 Id = product.Id,
                 Name = product.Name,
+                Price = product.Price,
                 Details = product.Details,
-                Price = product.Price
             };
-
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult Edit(EditViewModel model)
+        public async Task<IActionResult> Edit(ProductViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(model); // Model geçerlilik kontrolü başarısız olursa formu tekrar göster
+                return View(model);
             }
 
-            var product = _productService.GetProductById(model.Id);
-            if (product == null)
+            var success = await _productService.EditProductAsync(model);
+            if (!success)
             {
-                return NotFound(); // Ürün bulunamadıysa 404 hatası döndür
+                return NotFound();
             }
 
-            product.Name = model.Name;
-            product.Details = model.Details;
-            product.Price = model.Price;
+            return RedirectToAction("Home","Index");
 
-            _productService.UpdateProduct(product);
-
-            return RedirectToAction("Index"); // Başarılıysa index sayfasına yönlendir
         }
 
+        [HttpPost]
         public async Task<IActionResult> Delete(int productId)
         {
-           await _deleteService.DeleteProductAsync(productId);
+            var result = await _productService.DeleteProductAsync(productId);
+
+            if (!result)
+            {
+                return NotFound();
+            }
+
             return RedirectToAction("Index");
         }
 
@@ -111,51 +103,29 @@ namespace MainMVC.Controllers
 
         }
 
-        [HttpPost]
         [Route("/Product/Details/{id}")]
-        public IActionResult Details(int productId)
+        [HttpPost]
+        public async Task<IActionResult> Details(int id)
         {
-            var productDetailViewModel = _productDetailService.GetProductDetail(productId);
-            if (productDetailViewModel == null)
+            var product = await _productService.GetProductDetailAsync(id);
+
+            if (product == null)
             {
                 return NotFound();
             }
 
-
-            return View(productDetailViewModel);
+            return View(product);
         }
 
         [HttpGet]
         public IActionResult AddComment()
         {
-            return View(new CommentViewModel());
+            return View(new ProductViewModel());
         }
-
         [HttpPost]
-        public async Task<IActionResult> AddComment(CommentViewModel model)
+        public async Task<IActionResult> AddComment(ProductViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            try
-            {
-                // Yorum ekleme işlemi
-                var result = await _commentService.AddCommentAsync(model.UserName, model.Content, model.ProductId, model.StarCount);
-                if (!result)
-                {
-                    ModelState.AddModelError("", "Ürün veya kullanıcı bulunamadı."); // Kullanıcı veya ürün bulunamazsa hata mesajı ekle
-                    return View(model);
-                }
-
-                return RedirectToAction("Index", "Home"); // Yorum başarıyla eklendi, anasayfaya yönlendir.
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Yorum eklenirken bir hata oluştu."); // Hata olursa, hata mesajını ekle ve sayfayı tekrar göster.
-                return View(model);
-            }
+            return RedirectToAction("Index", "Home"); 
         }
     }
 }

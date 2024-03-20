@@ -13,9 +13,10 @@ namespace Data.Entity
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public int ProductId { get; set; }
 
         [ForeignKey("ProductId")]
-        public Product Products { get; set; }
+        public Product Product { get; set; }
 
         [Required]
         [Url]

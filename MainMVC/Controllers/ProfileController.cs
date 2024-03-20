@@ -19,7 +19,6 @@ namespace MainMVC.Controllers
             _userManager = userManager;
         }
 
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -35,14 +34,13 @@ namespace MainMVC.Controllers
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = user.Roles.Name,
+                Role = user.Role.Name,
                 Enabled = user.Enabled
             };
 
             return View(profileViewModel);
         }
 
-        [Authorize]
         public async Task<IActionResult> Details()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -58,14 +56,14 @@ namespace MainMVC.Controllers
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = user.Roles.Name,
+                Role = user.Role.Name,
                 Enabled = user.Enabled
             };
 
             return View(profileViewModel);
         }
 
-        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> Edit()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -85,7 +83,6 @@ namespace MainMVC.Controllers
             return View(profileViewModel);
         }
 
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Edit(ProfileViewModel profileViewModel)
         {
@@ -115,20 +112,18 @@ namespace MainMVC.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize]
         public async Task<IActionResult> MyOrders()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var orders = _profileService.GetUserOrders(Convert.ToInt32(userId));
+            var orders = _profileService.GetUserOrdersAsync(Convert.ToInt32(userId));
 
             return View(orders);
         }
 
-        [Authorize]
         public async Task<IActionResult> MyProducts()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var products = _profileService.GetSellerProducts(Convert.ToInt32(userId));
+            var products = _profileService.GetUserProductsAsync(Convert.ToInt32(userId));
 
             return View(products);
         }

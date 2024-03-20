@@ -29,5 +29,8 @@ namespace Data.Entity.EntityMVC
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public User User { get; set; }
+
     }
 }

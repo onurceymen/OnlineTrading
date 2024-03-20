@@ -25,36 +25,76 @@ namespace Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //Order
-            /*
+            modelBuilder.Entity<Category>()
+                .Property(c => c.Color)
+                .HasMaxLength(50);
+
+            // CartItem - User ilişkisi
+            modelBuilder.Entity<CartItem>()
+                        .HasOne(p => p.User)
+                        .WithMany()
+                        .HasForeignKey(p => p.UserId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // CartItem - Product ilişkisi
+            modelBuilder.Entity<CartItem>()
+                        .HasOne(p => p.Product)
+                        .WithMany()
+                        .HasForeignKey(p => p.ProductId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // Product - Seller ilişkisi
+            modelBuilder.Entity<Product>()
+                        .HasOne(p => p.Seller)
+                        .WithMany()
+                        .HasForeignKey(p => p.SellerId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // Product - Category ilişkisi
+            modelBuilder.Entity<Product>()
+                        .HasOne(p => p.Category)
+                        .WithMany()
+                        .HasForeignKey(p => p.CategoryId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // ProductComment - Product ilişkisi
+            modelBuilder.Entity<ProductComment>()
+                        .HasOne(p => p.Product)
+                        .WithMany(p => p.ProductComments)
+                        .HasForeignKey(p => p.ProductId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // ProductComment - User ilişkisi
+            modelBuilder.Entity<ProductComment>()
+                        .HasOne(p => p.User)
+                        .WithMany()
+                        .HasForeignKey(p => p.UserId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // OrderItem - Order ilişkisi
+            modelBuilder.Entity<OrderItem>()
+                        .HasOne(p => p.Order)
+                        .WithMany(p => p.OrderItems)
+                        .HasForeignKey(p => p.OrderId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // OrderItem - Product ilişkisi
+            modelBuilder.Entity<OrderItem>()
+                        .HasOne(p => p.Product)
+                        .WithMany()
+                        .HasForeignKey(p => p.ProductId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            // Order - User ilişkisi
             modelBuilder.Entity<Order>()
-            .HasOne(o => o.User)
-            .WithMany(u => u.Orders)
-            .HasForeignKey(o => o.UserId);
-            
-            
-            modelBuilder.Entity<OrderItem>()
-            .HasOne(oi => oi.Order)
-            .WithMany(o => o.OrderItems)
-            .HasForeignKey(oi => oi.OrderId);
+                        .HasOne(p => p.User)
+                        .WithMany(p => p.Order)
+                        .HasForeignKey(p => p.UserId)
+                        .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<OrderItem>()
-            .HasOne(oi => oi.Product)
-            .WithMany(p => p.OrderItems)
-            .HasForeignKey(oi => oi.ProductId);
-            
-             */
-            /*
-            modelBuilder.Entity<CartItem>()
-              .HasOne(c => c.User)
-              .WithMany(u => u.CartItems)
-              .HasForeignKey(c => c.UserId);
 
-            modelBuilder.Entity<CartItem>()
-                .HasOne(c => c.Product)
-                .WithMany(p => p.CartItems)
-                .HasForeignKey(c => c.ProductId);
-            */
+            base.OnModelCreating(modelBuilder);
+
         }
     }
 }

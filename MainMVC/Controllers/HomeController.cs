@@ -10,18 +10,14 @@ namespace MainMVC.Controllers
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly ListingService _listingService;
         private readonly ContactService _contactService;
-        private readonly ProductDetailService _productDetailService;
-        private readonly CommentService _commentService;
+        private readonly HomeService _homeService;
 
-        public HomeController(AppDbContext context, ListingService listingService, ContactService contactService, ProductDetailService productDetailService, CommentService commentService)
+        public HomeController(AppDbContext context, ContactService contactService, HomeService homeService)
         {
             _context = context;
-            _listingService = listingService;
             _contactService = contactService;
-            _productDetailService = productDetailService;
-            _commentService = commentService;
+            _homeService = homeService;
         }
 
         public IActionResult Index()
@@ -32,14 +28,13 @@ namespace MainMVC.Controllers
         [Route("/about-us")]
         public IActionResult AboutUs()
         {
-            // Register action implementation
             return View();
         }
 
         [HttpGet]
         public IActionResult Contact()
         {
-            return RedirectToAction("Index");
+            return View();
         }
 
 
@@ -57,8 +52,8 @@ namespace MainMVC.Controllers
 
         public IActionResult Listing()
         {
-            _listingService.GetAllProducts();
-            return View(_listingService);
+            var products = _homeService.GetAllProductsListings(); 
+            return View(products);
         }
 
         [HttpGet]
@@ -71,7 +66,7 @@ namespace MainMVC.Controllers
         [Route("{categoryName}-{title}-{id}/details")]
         public IActionResult ProductDetail(int id)
         {
-            var productDetailViewModel = _productDetailService.GetProductDetail(id);
+            var productDetailViewModel = _homeService.GetProductDetail(id);
             if (productDetailViewModel == null)
             {
                 return NotFound();

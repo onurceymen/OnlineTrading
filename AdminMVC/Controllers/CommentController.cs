@@ -15,15 +15,14 @@ namespace AdminMVC.Controllers
 
         public IActionResult List()
         {
-            var comments = _commentService.GetComments();
-            return View(comments);
+            return View();
         }
 
         [HttpPost]
         public IActionResult Approve(int commentId)
         {
-            _commentService.ApproveComment(commentId);
-            return RedirectToAction("List");
+
+            return View();
         }
     }
 }

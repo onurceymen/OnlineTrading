@@ -19,7 +19,7 @@ namespace Data.Entity
         public string Name { get; set; }
 
         [Required]
-        [StringLength(6, MinimumLength = 3)]
+        [StringLength(50, MinimumLength = 3)]
         public string Color { get; set; }
 
         [Required]

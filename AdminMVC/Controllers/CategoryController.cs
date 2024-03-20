@@ -1,42 +1,33 @@
-﻿using AdminMVC.Services.CategoryServices;
+﻿using AdminMVC.Contracts;
 using AdminMVC.ViewModels.CategoryViewModels;
-using Data.Context;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AdminMVC.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly CategoryCreateService _categoryCreateService;
-        private readonly CategoryEditService _categoryEditService;
-        private readonly CategoryDeleteService _categoryDeleteService;
-        private readonly AppDbContext _dbContext;
+        private readonly ICategoryService _categoryService;
 
-
-        public CategoryController(CategoryCreateService categoryCreateService, CategoryEditService categoryEditService, CategoryDeleteService categoryDeleteService, AppDbContext appDbContext)
+        public CategoryController(ICategoryService categoryService)
         {
-            _categoryCreateService = categoryCreateService;
-            _categoryEditService = categoryEditService;
-            _categoryDeleteService = categoryDeleteService;
-            _dbContext = appDbContext;
-
-
+            _categoryService = categoryService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            return View(categories);
         }
 
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new CategoryCreateViewModel());
+            return View(new CategoryViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CategoryCreateViewModel model)
+        public async Task<IActionResult> Create(CategoryViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -45,7 +36,7 @@ namespace AdminMVC.Controllers
 
             try
             {
-                await _categoryCreateService.CreateCategoryAsync(model);
+                await _categoryService.CreateCategoryAsync(model);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -55,11 +46,10 @@ namespace AdminMVC.Controllers
             }
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var viewModel = await _categoryEditService.GetCategoryForEditAsync(id);
+            var viewModel = await _categoryService.GetCategoryByIdAsync(id);
             if (viewModel == null)
             {
                 return NotFound();
@@ -69,9 +59,8 @@ namespace AdminMVC.Controllers
         }
 
         [HttpPost]
-        [Route("/category/{id}/edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(CategoryEditViewModel model)
+        public async Task<IActionResult> Edit(CategoryViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -80,7 +69,7 @@ namespace AdminMVC.Controllers
 
             try
             {
-                await _categoryEditService.UpdateCategoryAsync(model);
+                await _categoryService.UpdateCategoryAsync(model);
                 return RedirectToAction("Index");
             }
             catch (ArgumentException ex)
@@ -97,7 +86,7 @@ namespace AdminMVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var viewModel = await _categoryDeleteService.GetCategoryForDeleteAsync(id);
+            var viewModel = await _categoryService.GetCategoryByIdAsync(id);
             if (viewModel == null)
             {
                 return NotFound();
@@ -112,7 +101,7 @@ namespace AdminMVC.Controllers
         {
             try
             {
-                await _categoryDeleteService.DeleteCategoryAsync(id);
+                await _categoryService.DeleteCategoryAsync(id);
                 return RedirectToAction("Index");
             }
             catch (ArgumentException ex)

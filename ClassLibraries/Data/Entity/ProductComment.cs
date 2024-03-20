@@ -14,11 +14,13 @@ namespace Data.Entity
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        public int ProductId { get; set; }
         [ForeignKey("ProductId")]
-        public Product Products { get; set; }
+        public Product Product { get; set; }
 
+        public int UserId { get; set; }
         [ForeignKey("UserId")]
-        public User Users { get; set; }
+        public User User { get; set; }
 
         [Required]
         [StringLength(500, MinimumLength = 2)]

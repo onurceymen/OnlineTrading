@@ -8,15 +8,11 @@
         public string OrderCode { get; set; }
         public string Address { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<OrderItemViewModel> OrderItems { get; set; }
-    }
-
-    public class OrderItemViewModel
-    {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
         public decimal UnitPrice { get; set; }
         public byte Quantity { get; set; }
         public decimal TotalPrice { get; set; }
     }
+
 }
