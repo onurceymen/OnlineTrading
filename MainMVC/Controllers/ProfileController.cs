@@ -1,4 +1,5 @@
-﻿using Data.Entity;
+﻿using Data.Constants;
+using Data.Entity;
 using Data.Services;
 using MainMVC.ViewModels.ProfileViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,7 @@ namespace MainMVC.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole + "," + RoleConstant.SellerRole + RoleConstant.AdminRole)]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

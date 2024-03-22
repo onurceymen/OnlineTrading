@@ -1,4 +1,6 @@
 ﻿using AdminMVC.Services.UserServices;
+using Data.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AdminMVC.Controllers
@@ -11,16 +13,20 @@ namespace AdminMVC.Controllers
         {
             _userService = userService;
         }
+
+        [Authorize(Roles = RoleConstant.AdminRole)]
         public IActionResult Index()
         {
             return View();
         }
 
+        [Authorize(Roles = RoleConstant.AdminRole)]
         public IActionResult List()
         {
             return View();
         }
 
+        [Authorize(Roles = RoleConstant.AdminRole)]
         [HttpPost]
         public IActionResult Approve(int userId)
         {

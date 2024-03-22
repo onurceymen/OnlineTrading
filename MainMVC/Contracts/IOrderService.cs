@@ -6,5 +6,6 @@ namespace MainMVC.Contracts
     {
         Task<bool> CreateOrderAsync(OrderViewModel model);
         Task<OrderViewModel> GetOrderDetailsAsync(int orderId);
+        Task<List<OrderViewModel>> GetOrdersListAsync(int userId);
     }
 }

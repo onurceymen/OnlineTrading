@@ -1,48 +1,71 @@
-﻿using MainMVC.Services.CartServices;
-using MainMVC.ViewModels.CartViewModel;
+﻿using MainMVC.ViewModels.CartViewModel;
 using Microsoft.AspNetCore.Mvc;
-using MainMVC.ViewModels.CartViewModel;
+using Data.Constants;
+using Microsoft.AspNetCore.Authorization;
+using MainMVC.Contracts;
 
 
 namespace MainMVC.Controllers
 {
     public class CartController : Controller
     {
-        private readonly CartService _cartService;
+        private readonly ICartService _cartService;
 
-        public CartController(CartService cartService)
+        public CartController(ICartService cartService)
         {
             _cartService = cartService;
         }
-
-        public IActionResult Index()
+        [Authorize(Roles = RoleConstant.BuyerRole + "," + RoleConstant.SellerRole)]
+        public async Task<IActionResult> Index(int userId)
         {
-            return View();
+            var cartViewModel = await _cartService.GetCartDetailsAsync(userId);
+            return View(cartViewModel);
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole + RoleConstant.SellerRole)]
         [HttpGet]
         public IActionResult AddProductToCartAsync()
         {
             return View();
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole + RoleConstant.SellerRole)]
         [HttpPost]
-        public IActionResult AddProductToCartAsync(CartViewModel model)
+        public async Task<IActionResult> AddProductToCartAsync(CartViewModel model)
         {
-            _cartService.AddProductToCartAsync(model);
-            return RedirectToAction("Index", "Home");
+            await _cartService.AddProductToCartAsync(model);
+            return RedirectToAction("Index", new { userId = model.UserId });
         }
 
         [HttpGet]
-        public IActionResult EditCartItem()
+        [Authorize(Roles = RoleConstant.BuyerRole + RoleConstant.SellerRole)]
+        public async Task<IActionResult> RemoveProductFromCartAsync()
+        {
+            return View();
+
+        }
+
+        [Authorize(Roles = RoleConstant.BuyerRole + RoleConstant.SellerRole)]
+        [HttpPost]
+        public async Task<IActionResult> RemoveProductFromCartAsync(int cartItemId, int userId)
+        {
+            await _cartService.RemoveProductFromCartAsync(cartItemId);
+            return RedirectToAction("Index", new { userId = userId });
+        }
+
+        [Authorize(Roles = RoleConstant.BuyerRole + RoleConstant.SellerRole)]
+        [HttpGet]
+        public IActionResult UpdateCartItemQuantityAsync()
         {
             return RedirectToAction("Index", "Cart"); 
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole + RoleConstant.SellerRole)]
         [HttpPost]
-        public IActionResult EditCartItem(CartViewModel model)
+        public async Task<IActionResult> UpdateCartItemQuantityAsync(int cartItemId, byte quantity, int userId)
         {
-            return RedirectToAction("Index", "Cart"); 
+            await _cartService.UpdateCartItemQuantityAsync(cartItemId, quantity);
+            return RedirectToAction("Index", new { userId = userId });
         }
     }
 }

@@ -1,170 +1,137 @@
 ﻿using Data.Context;
 using Data.Entity;
+using Data.Services;
 using MainMVC.Contracts;
 using MainMVC.ViewModels.ProductViewModel;
-using Microsoft.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Principal;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MainMVC.Services.ProductServices
 {
     public class ProductService : IProductService
     {
-        private readonly AppDbContext _dbContext;
+        private readonly DataRepository<Product> _productRepository;
+        private readonly DataRepository<ProductComment> _productCommentRepository;
 
         public ProductService(AppDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _productRepository = new DataRepository<Product>(dbContext);
+            _productCommentRepository = new DataRepository<ProductComment>(dbContext);
         }
+
         public async Task<bool> CreateProductAsync(ProductViewModel model)
         {
-            var existingProduct = await _dbContext.Products.FindAsync(model.Id);
-            if (existingProduct != null)
+            var product = new Product
             {
-                existingProduct.Name = model.Name;
-                existingProduct.Price = model.Price;
-                existingProduct.Details = model.Details;
+                Name = model.Name,
+                Details = model.Details,
+                Price = model.Price
+            };
 
-                await _dbContext.SaveChangesAsync();
-                return true;
-            }
-            return false;
-
-
-
-            /* try
-            {
-                var product = new Product
-                {
-                    Name = model.Name,
-                    Details = model.Description,
-                    Price = model.Price,
-                    Seller = seller,
-                    Category = category,
-                    StockAmount = 0, // Yeni ürünler varsayılan olarak stokta yok
-                    CreatedAt = DateTime.UtcNow,
-                    Enabled = true // Yeni ürünler varsayılan olarak aktif
-                };
-
-                _dbContext.Products.Add(product);
-                await _dbContext.SaveChangesAsync();
-                return product;
-            }
-            catch (Exception ex)
-            {
-                // Hata durumunda loglama veya gerekli işlemler yapılabilir
-                return null;
-            }*/
+            await _productRepository.CreateAsync(product);
+            return true;
         }
-        public async Task<bool> EditProductAsync(ProductViewModel model)
-        {
-            try
-            {
-                var product = await _dbContext.Products.FindAsync(model.Id);
-                if (product == null)
-                {
-                    return false; // Ürün bulunamadı
-                }
 
+        public async Task<bool> UpdateProductAsync(ProductViewModel model)
+        {
+            var product = await _productRepository.GetByIdAsync(model.Id);
+            if (product != null)
+            {
                 product.Name = model.Name;
                 product.Details = model.Details;
                 product.Price = model.Price;
-
-                await _dbContext.SaveChangesAsync();
-                return true; // Başarıyla güncellendi
+                await _productRepository.UpdateAsync(product);
+                return true;
             }
-            catch (Exception ex)
-            {
-                // Hata durumunda loglama veya gerekli işlemler yapılabilir
-                return false;
-            }
-
-            /*var existingProduct = await _dbContext.Products.FindAsync(product.Id);
-            if (existingProduct != null)
-            {
-                existingProduct.Name = product.Name;
-                existingProduct.Price = product.Price;
-                existingProduct.Details = product.Details;
-                existingProduct.StockAmount = product.StockAmount;
-
-                await _dbContext.SaveChangesAsync();
-            }*/
+            return false;
         }
 
         public async Task<bool> DeleteProductAsync(int productId)
         {
-            try
-            {
-                var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
-                if (product == null)
-                {
-                    return false; // Ürün bulunamadı
-                }
-
-                _dbContext.Products.Remove(product);
-                await _dbContext.SaveChangesAsync();
-
-                return true; // Başarıyla silindi
-            }
-            catch (Exception ex)
-            {
-                // Hata durumunda loglama veya gerekli işlemler yapılabilir
-                return false;
-            }
+            await _productRepository.DeleteAsync(productId);
+            return true;
         }
 
         public async Task<bool> AddProductCommentAsync(ProductCommentViewModel model)
         {
-            var product = await _dbContext.Products.FindAsync(model.ProductId);
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.FirstName == model.UserName);
-
-            if (product == null || user == null)
+            var productComment = new ProductComment
             {
-                return false; 
-            }
-
-            var comment = new ProductComment
-            {
-                IsConfirmed = false,
-                CreatedAt = DateTime.Now,
-                Product = product,
-                User = user
+                ProductId = model.ProductId,
+                UserId = model.UserId,
+                Content = model.Content,
+                StarCount = model.StarCount,
+                CreatedAt = DateTime.UtcNow,
+                IsConfirmed = false
             };
 
-            _dbContext.ProductComments.Add(comment);
-            await _dbContext.SaveChangesAsync();
-
-            return true; 
+            await _productCommentRepository.CreateAsync(productComment);
+            return true;
         }
 
-        public Task<ProductViewModel> GetProductDetailAsync(int productId)
+        public async Task<ProductViewModel> GetProductDetailAsync(int productId)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<ProductViewModel>> GetAllProductsAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<ProductViewModel>> GetProductsByCategoryAsync(int categoryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<ProductViewModel>> GetAllCommentsForProduct(int productId)
-        {
-            var comments = _dbContext.ProductComments
-                .Where(c => c.Product.Id == productId)
-                .Select(c => new ProductViewModel
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product != null)
+            {
+                return new ProductViewModel
                 {
-                    UserName = c.User.FirstName,
-                    Content = c.Text,
-                    ProductId = c.Product.Id,
-                })
-                .ToListAsync();
+                    Id = product.Id,
+                    Name = product.Name,
+                    Details = product.Details,
+                    Price = product.Price
+                };
+            }
+            return null;
+        }
 
-            return await comments;
+        public async Task<IEnumerable<ProductViewModel>> GetAllProductsAsync()
+        {
+            var products = await _productRepository.GetAllAsync();
+            return products.Select(product => new ProductViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Details = product.Details,
+                Price = product.Price
+            }).ToList();
+        }
+
+        public async Task<IEnumerable<ProductViewModel>> GetProductsByCategoryAsync(int categoryId)
+        {
+            var products = await _productRepository.FindAsync(product => product.CategoryId == categoryId);
+            return products.Select(product => new ProductViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Details = product.Details,
+                Price = product.Price
+            }).ToList();
+        }
+
+        public async Task<IEnumerable<ProductViewModel>> GetUserProductsAsync(int userId)
+        {
+            var products = await _productRepository.FindAsync(product => product.UserId == userId);
+            return products.Select(product => new ProductViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Details = product.Details,
+                Price = product.Price
+            }).ToList();
+        }
+
+        public async Task<bool> UpdateProductStatusAsync(int productId, bool isEnabled)
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product != null)
+            {
+                product.IsEnabled = isEnabled;
+                await _productRepository.UpdateAsync(product);
+                return true;
+            }
+            return false;
         }
     }
 }

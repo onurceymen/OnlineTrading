@@ -8,6 +8,7 @@ using MainMVC.Services.AuthServices;
 using MainMVC.Services.CartServices;
 using MainMVC.Services.OrderServices;
 using Data.Services;
+using Data.Constants;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,8 +16,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole(RoleConstant.AdminRole));
+    options.AddPolicy("RequireSellerRole", policy => policy.RequireRole(RoleConstant.SellerRole));
+    options.AddPolicy("RequireBuyerRole", policy => policy.RequireRole(RoleConstant.BuyerRole));
+});
+
 //Services 
 //AuthServices
+builder.Services.AddScoped<DataRepository<User>>();
 builder.Services.AddScoped<AuthService>();
 
 //CartServices
@@ -39,8 +48,6 @@ builder.Services.AddScoped<ProfileService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer("Server=localhost;Database=OnlineTrading;User Id=sa;Password=reallyStrongPwd123;Encrypt=true;TrustServerCertificate=True;"));
 
-// ConfigureServices metoduna aþaðýdaki kodlarý ekleyin
-// AddIdentity ve AddEntityFrameworkStores metodlarýný düzeltin
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     // Identity ayarlarý
@@ -56,13 +63,16 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
     options.LoginPath = "/Auth/Login";
-    options.AccessDeniedPath = "/Auth/AccessDenied";
+    options.AccessDeniedPath = "/Auth/Login";
     options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
 });
 
 
 
 var app = builder.Build();
+
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

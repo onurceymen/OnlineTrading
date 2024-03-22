@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MainMVC.Services.AuthServices;
 using MainMVC.ViewModels.AuthViewModels;
+using Data.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MainMVC.Controllers
 {
@@ -13,12 +15,14 @@ namespace MainMVC.Controllers
             _authService = authService;
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole)]
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(AuthViewModel model)
@@ -36,12 +40,14 @@ namespace MainMVC.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole + "," + RoleConstant.SellerRole + RoleConstant.AdminRole)]
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole + "," + RoleConstant.SellerRole + RoleConstant.AdminRole)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(AuthViewModel model)
@@ -60,6 +66,7 @@ namespace MainMVC.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = RoleConstant.BuyerRole + "," + RoleConstant.SellerRole + RoleConstant.AdminRole)]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {

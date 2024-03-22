@@ -1,6 +1,7 @@
 ﻿using Bogus.DataSets;
 using Data.Context;
 using Data.Entity;
+using Data.Services;
 using MainMVC.Contracts;
 using MainMVC.ViewModels.OrderViewModel;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +10,13 @@ namespace MainMVC.Services.OrderServices
 {
     public class OrderService : IOrderService
     {
-        private readonly AppDbContext _dbContext;
+        private readonly DataRepository<Order> _orderRepository;
+        private readonly DataRepository<OrderItem> _orderItemRepository;
 
         public OrderService(AppDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _orderRepository = new DataRepository<Order>(dbContext);
+            _orderItemRepository = new DataRepository<OrderItem>(dbContext);
         }
 
         private string GenerateOrderCode()
@@ -29,11 +32,21 @@ namespace MainMVC.Services.OrderServices
                 UserId = model.UserId,
                 Address = model.Address,
                 CreatedAt = DateTime.Now,
-                OrderCode = GenerateOrderCode() // Bu metot rastgele sipariş kodu oluşturabilir
+                OrderCode = GenerateOrderCode()
             };
 
-            _dbContext.Orders.Add(newOrder);
-            await _dbContext.SaveChangesAsync();
+            await _orderRepository.CreateAsync(newOrder);
+
+            // Örnek olarak bir OrderItem ekliyorum, gerçek uygulamada sepetten ürünler eklenmelidir.
+            var newOrderItem = new OrderItem
+            {
+                OrderId = newOrder.Id,
+                ProductId = model.ProductId,
+                Quantity = model.Quantity,
+                UnitPrice = model.UnitPrice
+            };
+
+            await _orderItemRepository.CreateAsync(newOrderItem);
 
             return true;
         }
@@ -41,11 +54,7 @@ namespace MainMVC.Services.OrderServices
 
         public async Task<OrderViewModel> GetOrderDetailsAsync(int orderId)
         {
-            var order =  _dbContext.Orders
-                .Include(o => o.User)
-                .Include(o => o.OrderItems)
-                .ThenInclude(o => o.Product)
-                .FirstOrDefault(o => o.Id == orderId);
+            var order = await _orderRepository.GetByIdAsync(orderId);
 
             if (order == null)
             {
@@ -56,7 +65,6 @@ namespace MainMVC.Services.OrderServices
             {
                 OrderId = order.Id,
                 UserId = order.UserId,
-                UserName = order.User?.UserName,
                 OrderCode = order.OrderCode,
                 Address = order.Address,
                 CreatedAt = order.CreatedAt,
@@ -68,8 +76,24 @@ namespace MainMVC.Services.OrderServices
             };
 
             return orderViewModel;
-
-
         }
+
+        public async Task<List<OrderViewModel>> GetOrdersListAsync(int userId)
+        {
+            var orders = await _orderRepository.FindAsync(o => o.UserId == userId);
+
+            var orderViewModels = orders.Select(order => new OrderViewModel
+            {
+                OrderId = order.Id,
+                UserId = order.UserId,
+                OrderCode = order.OrderCode,
+                Address = order.Address,
+                CreatedAt = order.CreatedAt,
+                TotalPrice = order.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity)
+            }).ToList();
+
+            return orderViewModels;
+        }
+
     }
 }

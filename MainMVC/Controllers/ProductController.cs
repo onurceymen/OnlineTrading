@@ -1,19 +1,20 @@
-﻿using Data.Entity;
-using MainMVC.Services.ProductServices;
+﻿using Data.Constants;
+using MainMVC.Contracts;
 using MainMVC.ViewModels.ProductViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace MainMVC.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ProductService _productService;
+        private readonly IProductService _productService;
 
-        public ProductController(ProductService productService)
+        public ProductController(IProductService productService)
         {
             _productService = productService;
         }
+
 
         public async Task<IActionResult> Index()
         {
@@ -21,81 +22,43 @@ namespace MainMVC.Controllers
             return View(products);
         }
 
+        [Authorize(Roles = RoleConstant.SellerRole)]
         [HttpGet]
         public IActionResult Create()
         {
             return View(new ProductViewModel());
         }
 
+        [Authorize(Roles = RoleConstant.SellerRole)]
         [HttpPost]
         public async Task<IActionResult> Create(ProductViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var product = await _productService.CreateProductAsync(model);
-
-            if (product == null)
-            {
-                ModelState.AddModelError("", "Ürün oluşturulamadı.");
-                return View(model);
-            }
-
-            return RedirectToAction("Details", new { id = model.Id });
+            await _productService.CreateProductAsync(model);
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int productId)
+        public async Task<IActionResult> Edit(int id)
         {
-            var product = await _productService.GetProductDetailAsync(productId);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            var model = new ProductViewModel
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                Details = product.Details,
-            };
-            return View(model);
+            var product = await _productService.GetProductDetailAsync(id);
+            return View(product);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(ProductViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var success = await _productService.EditProductAsync(model);
-            if (!success)
-            {
-                return NotFound();
-            }
-
-            return RedirectToAction("Home","Index");
-
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Delete(int productId)
-        {
-            var result = await _productService.DeleteProductAsync(productId);
-
-            if (!result)
-            {
-                return NotFound();
-            }
-
+            await _productService.UpdateProductAsync(model);
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _productService.DeleteProductAsync(id);
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = RoleConstant.SellerRole)]
         [HttpGet]
         public IActionResult Details()
         {
@@ -103,25 +66,40 @@ namespace MainMVC.Controllers
 
         }
 
+        [Authorize(Roles = RoleConstant.SellerRole)]
         [Route("/Product/Details/{id}")]
         [HttpPost]
         public async Task<IActionResult> Details(int id)
         {
             var product = await _productService.GetProductDetailAsync(id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
             return View(product);
         }
 
+
+        [HttpGet]
+        [Authorize(Roles = RoleConstant.SellerRole)]
+        public async Task<IActionResult> UserProducts(int userId)
+        {
+            var products = await _productService.GetUserProductsAsync(userId);
+            return View(products);
+        }
+
+        [Authorize(Roles = RoleConstant.SellerRole)]
+        [HttpPost]
+        public async Task<IActionResult> UpdateProductStatus(int productId, bool isEnabled)
+        {
+            await _productService.UpdateProductStatusAsync(productId, isEnabled);
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = RoleConstant.SellerRole + RoleConstant.BuyerRole)]
         [HttpGet]
         public IActionResult AddComment()
         {
             return View(new ProductViewModel());
         }
+
+        [Authorize(Roles = RoleConstant.SellerRole + RoleConstant.BuyerRole)]
         [HttpPost]
         public async Task<IActionResult> AddComment(ProductViewModel model)
         {

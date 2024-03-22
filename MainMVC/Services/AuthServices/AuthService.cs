@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Data.Entity;
 using MainMVC.Contracts;
 using Data.Context;
+using Data.Services;
 
 namespace MainMVC.Services.AuthServices
 {
@@ -10,13 +11,13 @@ namespace MainMVC.Services.AuthServices
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly AppDbContext _appDbContext;
+        private readonly DataRepository<User> _userRepository;
 
-        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, DataRepository<User> userRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-
+            _userRepository = userRepository;
         }
 
         public async Task<bool> RegisterAsync(AuthViewModel model)
